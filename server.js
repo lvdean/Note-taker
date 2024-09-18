@@ -16,13 +16,9 @@ app.get('/', (req, res) =>
 app.get('/notes', (req, res) =>
   res.sendFile(path.join(__dirname, './public/notes.html')));
 
-
-
 // get request for notes
 app.get('/api/notes', (req, res) => {
   console.info(`GET/api/notes`);
-
-
 
   fs.readFile(path.join(__dirname, '/db/db.json'), 'utf8', (err, data) => {
     if (err) {
@@ -38,12 +34,10 @@ app.get('/api/notes', (req, res) => {
 // POST request for notes (to add)
 app.post('/api/notes', (req, res) => {
   console.info(`POST/api/notes`);
-  // res.status(200).json(data);
 
-  // Items in req.body
-
+// Items in req.body
   const { title, text } = req.body
-  // let response;
+// shorten id created
   const randomID = uuidv4().slice(0, 4)
   const newNote = {
     title,
@@ -51,57 +45,59 @@ app.post('/api/notes', (req, res) => {
     id: randomID
   };
 
-
   // read db.son file
   fs.readFile(path.join(__dirname, '/db/db.json'), 'utf8', (err, data) => {
-
+    // parsethe JSONdata
     const parsedData = JSON.parse(data)
     parsedData.push(newNote)
-    console.log(parsedData, 'lauren')
+    // check JSON data
+    console.log(parsedData)
     //writing a new note to db folder
     fs.writeFile(`db/db.json`, JSON.stringify(parsedData), (err) => {
-      // find render code
-      // console.log(data);
-      // res.status(200).json(JSON.parse(data));
+      // check status
       const response = {
         status: 'success',
         body: newNote,
       };
-
       console.log(response);
       res.status(201).json(response);
     }
     );
-
-
-
   });
-
-
 });
-
-
-//   res.json(`Note has been added!`);
-// } else {
-//   res.json('Note must contain both title and text');
-// }
-
-
-// Log the response body to the console
-// console.log(req.body);
-
-
 
 // DELETE  request for notes
 
-app.delete('/api/notes', (req, res) => {
-  console.info(`DELETE/api/notes`);
-  res.status(200).json(reviews);
-})
+app.delete('/api/notes/:id', (req, res) => {
+  const noteId = req.params.id;
 
-// write note to file
-// fs.writeFile(`./db/db.json`)
+//reading notes file
+fs.readFile(path.join(__dirname, '/db/db.json'), 'utf8', (err, data) =>{
+  if (err) {
+    return res.status(500).json({ message: 'Error reading notes' });
+}
 
-// GET/api/notes should return the notes.html file
-// GET * should return the index.html file
+let notes;
+try {
+    notes = JSON.parse(data);
+} catch (parseError) {
+    return res.status(500).json({ message: 'Error parsing notes' });
+} 
+const noteIndex = notes.findIndex(note => note.id === noteId);
+        if (noteIndex === -1) {
+            return res.status(404).json({ message: 'Note not found' });
+        }
+ // Remove the note from the array
+ notes.splice(noteIndex, 1);
+
+//  write notes to file
+ fs.writeFile(`db/db.json`, JSON.stringify(notes,null,2), (err) => {
+  if (err) {
+    return res.status(500).json({ message: 'Error writing notes' });
+}
+res.status(204).send(); 
+    });
+  });
+});
+
 app.listen(3000, () => console.log('server is running'));
