@@ -59,4 +59,6 @@ To run the application, within the terminal, type the command node server.js.
 ## Links  
 [![Github](https://img.shields.io/badge/my_portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://github.com/lvdean/OOP-SVG-Logo-Generator)
 
+[Deployed Website](http://lauren.note.taker/)
+
 
